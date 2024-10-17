@@ -85,6 +85,57 @@ def apply_effects(img, temperature_value, blur, sharpen, ca, saturation, contras
     return img
 
 
+def create_ui():
+    with ui_components.InputAccordion(False, label='Photo Refiner') as pr_enabled:
+        blur_intensity = gr.Slider(minimum=0, maximum=5, step=0.1, value=0, label="Blur")
+        sharpen_intensity = gr.Slider(minimum=0, maximum=10, step=0.1, value=0, label="Sharpening")
+        chromatic_aberration = gr.Slider(minimum=0, maximum=3, step=1, value=0, label="Chromatic Aberration")
+        saturation_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Saturation")
+        contrast_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Contrast")
+        brightness_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Brightness")
+        highlights_intensity = gr.Slider(minimum=-10, maximum=10, step=0.1, value=0, label="Highlights")
+        shadows_intensity = gr.Slider(minimum=-10, maximum=10, step=0.1, value=0, label="Shadows")
+        temperature_value = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Temperature")
+        with gr.Row():
+            sepia_filter = gr.Checkbox(value=False, label="Sepia Efect")
+            film_grain = gr.Checkbox(value=False, label="Filmic Grain")
+
+        reset_button = gr.Button("Reset sliders")
+
+    def reset_sliders():
+        return [0] * 10
+
+    def on_reset_button_click():
+        return reset_sliders()
+
+    reset_button.click(fn=on_reset_button_click, outputs=[
+        blur_intensity,
+        sharpen_intensity,
+        chromatic_aberration,
+        saturation_intensity,
+        contrast_intensity,
+        brightness_intensity,
+        highlights_intensity,
+        shadows_intensity,
+        temperature_value
+    ])
+
+    return {
+        'pr_enabled': pr_enabled,
+        'temperature_value': temperature_value,
+        'blur': blur_intensity,
+        'sharpen': sharpen_intensity,
+        'ca': chromatic_aberration,
+        'saturation': saturation_intensity,
+        'contrast': contrast_intensity,
+        'brightness': brightness_intensity,
+        'highlights': highlights_intensity,
+        'shadows': shadows_intensity,
+        'film_grain': film_grain,
+        'sepia_filter': sepia_filter,
+    }
+
+
 class Script(scripts.Script):
 
     def title(self, enabled=False):
@@ -94,41 +145,7 @@ class Script(scripts.Script):
         return scripts.AlwaysVisible
 
     def ui(self, is_img2img):
-        with ui_components.InputAccordion(False, label=self.title()) as pr_enabled:
-            blur_intensity = gr.Slider(minimum=0, maximum=5, step=0.1, value=0, label="Blur")
-            sharpen_intensity = gr.Slider(minimum=0, maximum=10, step=0.1, value=0, label="Sharpening")
-            chromatic_aberration = gr.Slider(minimum=0, maximum=3, step=1, value=0, label="Chromatic Aberration")
-            saturation_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Saturation")
-            contrast_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Contrast")
-            brightness_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Brightness")
-            highlights_intensity = gr.Slider(minimum=-10, maximum=10, step=0.1, value=0, label="Highlights")
-            shadows_intensity = gr.Slider(minimum=-10, maximum=10, step=0.1, value=0, label="Shadows")
-            temperature_value = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Temperature")
-            with gr.Row():
-                sepia_filter = gr.Checkbox(value=False, label="Sepia Efect")
-                film_grain = gr.Checkbox(value=False, label="Filmic Grain")
-
-            reset_button = gr.Button("Reset sliders")
-
-        def reset_sliders():
-            return [0] * 10
-
-        def on_reset_button_click():
-            return reset_sliders()
-
-        reset_button.click(fn=on_reset_button_click, outputs=[
-            blur_intensity,
-            sharpen_intensity,
-            chromatic_aberration,
-            saturation_intensity,
-            contrast_intensity,
-            brightness_intensity,
-            highlights_intensity,
-            shadows_intensity,
-            temperature_value
-        ])
-
-        return [pr_enabled, temperature_value, blur_intensity, sharpen_intensity, chromatic_aberration, saturation_intensity, contrast_intensity, brightness_intensity, highlights_intensity, shadows_intensity, film_grain, sepia_filter]
+        return list(create_ui().values())
 
     def postprocess(self, p, processed, pr_enabled, temperature_value, blur_intensity, sharpen_intensity, chromatic_aberration, saturation_intensity, contrast_intensity, brightness_intensity, highlights_intensity, shadows_intensity, film_grain, sepia_filter, *args):
         if pr_enabled:
@@ -170,54 +187,7 @@ class PhotoRefinerPP(scripts_postprocessing.ScriptPostprocessing):
     order = 90000
 
     def ui(self):
-        with ui_components.InputAccordion(False, label=self.name) as pr_enabled:
-            blur_intensity = gr.Slider(minimum=0, maximum=5, step=0.1, value=0, label="Blur")
-            sharpen_intensity = gr.Slider(minimum=0, maximum=10, step=0.1, value=0, label="Sharpening")
-            chromatic_aberration = gr.Slider(minimum=0, maximum=3, step=1, value=0, label="Chromatic Aberration")
-            saturation_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Saturation")
-            contrast_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Contrast")
-            brightness_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Brightness")
-            highlights_intensity = gr.Slider(minimum=-10, maximum=10, step=0.1, value=0, label="Highlights")
-            shadows_intensity = gr.Slider(minimum=-10, maximum=10, step=0.1, value=0, label="Shadows")
-            temperature_value = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Temperature")
-            with gr.Row():
-                sepia_filter = gr.Checkbox(value=False, label="Sepia Efect")
-                film_grain = gr.Checkbox(value=False, label="Filmic Grain")
-
-            reset_button = gr.Button("Reset sliders")
-
-        def reset_sliders():
-            return [0] * 10
-
-        def on_reset_button_click():
-            return reset_sliders()
-
-        reset_button.click(fn=on_reset_button_click, outputs=[
-            blur_intensity,
-            sharpen_intensity,
-            chromatic_aberration,
-            saturation_intensity,
-            contrast_intensity,
-            brightness_intensity,
-            highlights_intensity,
-            shadows_intensity,
-            temperature_value
-        ])
-
-        return {
-            'pr_enabled': pr_enabled,
-            'temperature_value': temperature_value,
-            'blur': blur_intensity,
-            'sharpen': sharpen_intensity,
-            'ca': chromatic_aberration,
-            'saturation': saturation_intensity,
-            'contrast': contrast_intensity,
-            'brightness': brightness_intensity,
-            'highlights': highlights_intensity,
-            'shadows': shadows_intensity,
-            'film_grain': film_grain,
-            'sepia_filter': sepia_filter,
-        }
+        return create_ui()
 
     def process(self, pp: scripts_postprocessing.PostprocessedImage, **args):
         if not args.pop('pr_enabled', False):
