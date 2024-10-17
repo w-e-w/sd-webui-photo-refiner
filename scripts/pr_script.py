@@ -4,8 +4,7 @@ import modules.scripts as scripts
 from modules import ui_components, shared, util, paths_internal
 import numpy as np
 from PIL import Image, ImageEnhance, ImageChops, ImageFilter
-import random
-import string
+from datetime import datetime
 
 
 shared.options_templates.update(shared.options_section(("saving-paths", "Paths for saving"), {
@@ -126,10 +125,7 @@ class Script(scripts.Script):
             img = Image.fromarray((img_np * 255).astype(np.uint8))
 
         return img
-        
-    def generate_unique_id(self, length=6):
-        return ''.join(random.choices(string.ascii_letters + string.digits, k=length))      
-        
+
     def postprocess(self, p, processed, pr_enabled, temperature_value, blur_intensity, sharpen_intensity, chromatic_aberration, saturation_intensity, contrast_intensity, brightness_intensity, highlights_intensity, shadows_intensity, film_grain, sepia_filter, *args):
         if pr_enabled:
             
@@ -162,7 +158,6 @@ class Script(scripts.Script):
     
             for i, img_array in enumerate(processed.images):
                 img = Image.fromarray(img_array)
-                unique_id = self.generate_unique_id()
-                file_path = os.path.join(output_dir, f"refined_image_{unique_id}.png")
+                timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S.%f')
+                file_path = os.path.join(output_dir, f"{timestamp}.png")
                 img.save(file_path)
-    
