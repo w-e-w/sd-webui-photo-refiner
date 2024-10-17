@@ -2,12 +2,8 @@ import gradio as gr
 import os
 import modules.scripts as scripts
 from modules import ui_components, shared, util, paths_internal
-from modules import images
-from modules.shared import opts
-from modules.processing import Processed
-import cv2
 import numpy as np
-from PIL import Image, ImageEnhance, ImageChops, ImageFilter, ImageDraw
+from PIL import Image, ImageEnhance, ImageChops, ImageFilter
 import random
 import string
 
@@ -40,9 +36,6 @@ class Script(scripts.Script):
             film_grain = gr.Checkbox(value=False, label="Filmic Grain")
 
             reset_button = gr.Button("Reset sliders")
-
-            with gr.Accordion(label="Hints", elem_id="photo-refiner-hints-12", open=False) as accordion2:
-                gr.Markdown("### Wiki with examples: - https://github.com/Marc0ai/sd-webui-photo-refiner")
 
         def reset_sliders():
             return [0] * 10
