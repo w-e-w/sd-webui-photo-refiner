@@ -1,6 +1,7 @@
 import gradio as gr
 import os
 import modules.scripts as scripts
+from modules import ui_components
 from modules import images
 from modules.shared import opts
 from modules.processing import Processed
@@ -10,62 +11,51 @@ from PIL import Image, ImageEnhance, ImageChops, ImageFilter, ImageDraw
 import random
 import string
 
+
 class Script(scripts.Script):
 
     def title(self, enabled=False):
-        if enabled:
-            return "Photo Refiner 1.2 - Enabled"
-        else:
-            return "Photo Refiner 1.2"
+        return "Photo Refiner 1.2"
 
     def show(self, is_img2img):
         return scripts.AlwaysVisible
 
     def ui(self, is_img2img):
-        with gr.Blocks() as demo:
-            with gr.Accordion(label=self.title(), elem_id="photo-refiner-12", open=False) as accordion:
-                pr_enabled = gr.Checkbox(value=False, label="Enable")
-                gr.Markdown("━━━━━━")
-                blur_intensity = gr.Slider(minimum=0, maximum=5, step=0.1, value=0, label="Blur")
-                sharpen_intensity = gr.Slider(minimum=0, maximum=10, step=0.1, value=0, label="Sharpening")
-                chromatic_aberration = gr.Slider(minimum=0, maximum=3, step=1, value=0, label="Chromatic Aberration")
-                saturation_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Saturation")
-                contrast_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Contrast")
-                brightness_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Brightness")
-                highlights_intensity = gr.Slider(minimum=-10, maximum=10, step=0.1, value=0, label="Highlights")
-                shadows_intensity = gr.Slider(minimum=-10, maximum=10, step=0.1, value=0, label="Shadows")
-                temperature_value = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Temperature")
-                sepia_filter = gr.Checkbox(value=False, label="Sepia Efect")
-                film_grain = gr.Checkbox(value=False, label="Filmic Grain")
+        with ui_components.InputAccordion(False, label=self.title()) as pr_enabled:
+            blur_intensity = gr.Slider(minimum=0, maximum=5, step=0.1, value=0, label="Blur")
+            sharpen_intensity = gr.Slider(minimum=0, maximum=10, step=0.1, value=0, label="Sharpening")
+            chromatic_aberration = gr.Slider(minimum=0, maximum=3, step=1, value=0, label="Chromatic Aberration")
+            saturation_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Saturation")
+            contrast_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Contrast")
+            brightness_intensity = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Brightness")
+            highlights_intensity = gr.Slider(minimum=-10, maximum=10, step=0.1, value=0, label="Highlights")
+            shadows_intensity = gr.Slider(minimum=-10, maximum=10, step=0.1, value=0, label="Shadows")
+            temperature_value = gr.Slider(minimum=-5, maximum=5, step=0.1, value=0, label="Temperature")
+            sepia_filter = gr.Checkbox(value=False, label="Sepia Efect")
+            film_grain = gr.Checkbox(value=False, label="Filmic Grain")
 
-                reset_button = gr.Button("Reset sliders")
+            reset_button = gr.Button("Reset sliders")
 
-                with gr.Accordion(label="Hints", elem_id="photo-refiner-hints-12", open=False) as accordion2:
-                    gr.Markdown("### Wiki with examples: - https://github.com/Marc0ai/sd-webui-photo-refiner")
-                
-            def reset_sliders():
-                return [0] * 10
+            with gr.Accordion(label="Hints", elem_id="photo-refiner-hints-12", open=False) as accordion2:
+                gr.Markdown("### Wiki with examples: - https://github.com/Marc0ai/sd-webui-photo-refiner")
 
-            def update_title(pr_enabled):
-                new_title = "Photo Refiner 1.2 - Enabled" if pr_enabled else "Photo Refiner 1.2"
-                return gr.update(label=new_title)
+        def reset_sliders():
+            return [0] * 10
 
-            def on_reset_button_click():
-                return reset_sliders()
+        def on_reset_button_click():
+            return reset_sliders()
 
-            reset_button.click(fn=on_reset_button_click, outputs=[
-                blur_intensity,
-                sharpen_intensity,
-                chromatic_aberration,
-                saturation_intensity,
-                contrast_intensity,
-                brightness_intensity,
-                highlights_intensity,
-                shadows_intensity,
-                temperature_value
-            ])
-
-            pr_enabled.change(fn=update_title, inputs=pr_enabled, outputs=accordion)
+        reset_button.click(fn=on_reset_button_click, outputs=[
+            blur_intensity,
+            sharpen_intensity,
+            chromatic_aberration,
+            saturation_intensity,
+            contrast_intensity,
+            brightness_intensity,
+            highlights_intensity,
+            shadows_intensity,
+            temperature_value
+        ])
 
         return [pr_enabled, temperature_value, blur_intensity, sharpen_intensity, chromatic_aberration, saturation_intensity, contrast_intensity, brightness_intensity, highlights_intensity, shadows_intensity, film_grain, sepia_filter]
 
