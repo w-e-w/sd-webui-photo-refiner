@@ -172,14 +172,12 @@ class Script(scripts.Script):
                     film_grain,
                     sepia_filter
                 )
-    
-                processed.images[i] = np.array(processed_image)
-    
-            for i, img_array in enumerate(processed.images):
-                img = Image.fromarray(img_array)
+
                 timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S.%f')
                 file_path = os.path.join(output_dir, f"{timestamp}.png")
-                img.save(file_path)
+                processed_image.save(file_path)
+                processed_image.already_saved_as = file_path
+                processed.images[i] = processed_image
 
 
 class PhotoRefinerPP(scripts_postprocessing.ScriptPostprocessing):
