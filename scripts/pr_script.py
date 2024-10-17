@@ -7,8 +7,10 @@ from PIL import Image, ImageEnhance, ImageChops, ImageFilter
 from datetime import datetime
 
 
+default_output_dir = os.path.join(paths_internal.default_output_dir, 'photo_refiner_outputs')
+
 shared.options_templates.update(shared.options_section(("saving-paths", "Paths for saving"), {
-    "photo_refiner_outputs_dir": shared.OptionInfo(util.truncate_path(os.path.join(paths_internal.default_output_dir, 'photo_refiner_outputs')), 'Output directory for photo refiner images', component_args=shared.hide_dirs),
+    "photo_refiner_outputs_dir": shared.OptionInfo(util.truncate_path(default_output_dir), 'Output directory for photo refiner images', component_args=shared.hide_dirs),
 }))
 
 
@@ -149,7 +151,7 @@ class Script(scripts.Script):
 
     def postprocess(self, p, processed, pr_enabled, temperature_value, blur_intensity, sharpen_intensity, chromatic_aberration, saturation_intensity, contrast_intensity, brightness_intensity, highlights_intensity, shadows_intensity, film_grain, sepia_filter, *args):
         if pr_enabled:
-            output_dir = shared.opts.photo_refiner_outputs_dir
+            output_dir = shared.opts.photo_refiner_outputs_dir.strip() or default_output_dir
             os.makedirs(output_dir, exist_ok=True)
     
             for i in range(len(processed.images)):
