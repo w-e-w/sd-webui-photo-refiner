@@ -1,7 +1,7 @@
 import gradio as gr
 import os
 import modules.scripts as scripts
-from modules import ui_components, shared, util, paths_internal, scripts_postprocessing
+from modules import ui_components, shared, util, paths_internal, scripts_postprocessing, processing, images
 import numpy as np
 from PIL import Image, ImageEnhance, ImageChops, ImageFilter
 from datetime import datetime
@@ -149,37 +149,40 @@ class Script(scripts.Script):
     def ui(self, is_img2img):
         return list(create_ui().values())
 
-    def postprocess(self, p, processed, pr_enabled, temperature_value, blur_intensity, sharpen_intensity, chromatic_aberration, saturation_intensity, contrast_intensity, brightness_intensity, highlights_intensity, shadows_intensity, film_grain, sepia_filter, *args):
+    def postprocess_image_after_composite(self, p, pp, pr_enabled, temperature_value, blur_intensity, sharpen_intensity, chromatic_aberration, saturation_intensity, contrast_intensity, brightness_intensity, highlights_intensity, shadows_intensity, film_grain, sepia_filter, *args):
+    # def postprocess(self, p, processed, pr_enabled, temperature_value, blur_intensity, sharpen_intensity, chromatic_aberration, saturation_intensity, contrast_intensity, brightness_intensity, highlights_intensity, shadows_intensity, film_grain, sepia_filter, *args):
         if pr_enabled:
             output_dir = shared.opts.photo_refiner_outputs_dir.strip() or default_output_dir
             os.makedirs(output_dir, exist_ok=True)
-    
-            for i in range(len(processed.images)):
-                if isinstance(processed.images[i], np.ndarray):
-                    processed_image = Image.fromarray(processed.images[i])
-                else:
-                    processed_image = processed.images[i]
-    
-                processed_image = apply_effects(
-                    processed_image,
-                    temperature_value,
-                    blur_intensity,
-                    sharpen_intensity,
-                    chromatic_aberration,
-                    saturation_intensity,
-                    contrast_intensity,
-                    brightness_intensity,
-                    highlights_intensity,
-                    shadows_intensity,
-                    film_grain,
-                    sepia_filter
-                )
 
-                timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S.%f')
-                file_path = os.path.join(output_dir, f"{timestamp}.png")
-                processed_image.save(file_path)
-                processed_image.already_saved_as = file_path
-                processed.images[i] = processed_image
+            def infotext(index=0, use_main_prompt=False):
+                return processing.create_infotext(p, p.prompts, p.seeds, p.subseeds, use_main_prompt=use_main_prompt, index=index, all_negative_prompts=p.negative_prompts)
+
+
+            images.save_image(pp.image, p.outpath_samples, "", p.seeds[i], p.prompts[i], opts.samples_format, info=infotext(i), p=p, suffix="-photo-refiner")
+
+            processed_image = apply_effects(
+                pp.image,
+                temperature_value,
+                blur_intensity,
+                sharpen_intensity,
+                chromatic_aberration,
+                saturation_intensity,
+                contrast_intensity,
+                brightness_intensity,
+                highlights_intensity,
+                shadows_intensity,
+                film_grain,
+                sepia_filter
+            )
+
+
+
+            timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S.%f')
+            file_path = os.path.join(output_dir, f"{timestamp}.png")
+            processed_image.save(file_path)
+            processed_image.already_saved_as = file_path
+            processed.images[i] = processed_image
 
 
 class PhotoRefinerPP(scripts_postprocessing.ScriptPostprocessing):
